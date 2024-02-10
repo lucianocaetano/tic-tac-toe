@@ -1,0 +1,100 @@
+import { useState } from 'react'
+
+const TURNS = {
+  X: "x",
+  O: "o"
+}
+
+const Square = ({children, isSelected, update, index}) => {
+  const className = `square ${isSelected ? "is-selected" : ""}`
+
+  const handleClick = () => {
+    update(index)
+  }
+
+  return (
+    <div onClick={handleClick} className={className} key={index}>
+      {children}
+    </div>
+  )
+}
+
+const WIN_COMBOS = [
+  //horizontal
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  //vertical
+  [1, 4, 7],
+  [2, 5, 8],
+  [3, 6, 9],
+  //diagonal
+  [1, 5, 9],
+  [3, 5, 7],
+]
+
+function App() {
+  const [board, setBoard] = useState(Array(9).fill(null))
+  const [turn, setTurn] = useState(TURNS.X)
+  //null = no ganador, false = empate, true = ganador
+  const [ win, setWin] = useState(null)
+  
+  const checkWin = (boardToCheck) => {
+    for (const combo of WIN_COMBOS){
+      const [a, b, c] = combo
+      if(
+        boardToCheck[a] 
+        && boardToCheck[a] === boardToCheck[b] && 
+        boardToCheck[a] === boardToCheck[c]
+      ){
+        return boardToCheck[a]
+      }
+    }
+    //no hay ganador
+    return null
+
+  }
+
+  console.log(board)
+  console.log(turn)
+  const updateBoard = (index) => {
+    if (board[index])
+      return
+
+    const newBoard = [...board]
+    newBoard[index] = turn
+    setBoard(newBoard)
+
+    setTurn(turn === TURNS.X ? TURNS.O : TURNS.X)
+
+    const newWin = checkWin(newBoard)
+    if(newWin){
+      setWin(newWin)
+      alert(`EL ganador es ${newWin}`)
+    }
+  }
+
+  return (
+    <main className="board">
+      <h1>Tic Tac Toe</h1>
+
+      <section className="game">
+        {
+          board.map((data, index) => {
+            return (
+              <Square key={index} index={index} update={updateBoard}>
+                {board[index]}
+              </Square>
+            )
+          })
+        }
+      </section>
+      <section className="turn">
+        <Square isSelected={turn === TURNS.X}>{TURNS.X}</Square>
+        <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
+      </section>
+    </main>
+  )
+}
+
+export default App
